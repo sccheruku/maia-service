@@ -1,29 +1,49 @@
 # maia-service
 
-How a human of a given rating would move: [Maia](https://www.maiachess.com/) (University of Toronto,
-CSSLab) behind a small HTTP API, for [HoneyChess](https://honeychess.com). Private; called by
-HoneyChess's API only.
+How a human of a given rating would move: [Maia-3](https://github.com/CSSLab/maia3) (CSSLab, University
+of Toronto) behind a small HTTP API, one AWS Lambda per model, no Docker and no PyTorch: it runs
+Maia-3 through [maia3-web](https://github.com/GeoffreyPlitt/maia3-web) (plain TypeScript, int8
+weights). Built for [HoneyChess](https://honeychess.com); generic, so anyone can run it.
 
-Plan: HoneyChess `todos/todo-111.md` (sccheruku/chess-metrics).
+Licence: AGPL-3.0 (Maia-3's). See NOTICE for credits.
 
-## The contract (planned)
+## API
 
+`POST /maia/v3/<size>/predict` (today: `5m`)
+
+```json
+{ "fen": "r1bqkbnr/pppp1ppp/8/8/3QP3/8/PPP2PPP/RNB1KB1R b KQkq - 0 5", "elo": 480, "oppElo": 470,
+  "history": ["<earlier FENs, oldest first; optional, the model reads the last eight>"] }
 ```
-POST /predict
-{ "fen": "<FEN>", "rating": 1200 }            // or "band": "1100-1200"
-→ { "moves": [ { "uci": "e2e4", "san": "e4", "p": 0.41 }, ... ] }   // most likely first
+
+or `{ "positions": [ ...up to 16 of the above ] }`. Answer:
+
+```json
+{ "ok": true, "model": "maia3-5m", "ms": 758,
+  "results": [ { "moves": [ { "uci": "g8f6", "san": "Nf6", "p": 0.17 }, ... ],
+                 "value": { "loss": 0.53, "draw": 0.10, "win": 0.37 } } ] }
 ```
 
-Batched (several positions a call), cached by (FEN, rating band).
+Every legal move, most likely first; `value` is for the side to move. Ratings 400-3000 (Maia-3 learned
+from lichess games). `GET /health` names the model. No users, no games: only positions.
 
-## First steps
+## Run it
 
-1. **Licences:** Maia's code and model weights (Maia and Maia-2). If GPL, this repository is GPL too,
-   kept apart from HoneyChess's code; a network service doesn't require publishing the source (AGPL
-   would).
-2. **Which model:** Maia-2 (one model, rating as an input) or the original Maia (one model per rating
-   band); sizes; CPU time per position.
-3. **The wrapper:** a small Python HTTP server; a container on AWS (Lambda container or a small
-   service) behind HoneyChess's API; a cost estimate.
+```sh
+npm ci
+npm test
+npm run serve          # http://localhost:8787 with every model in models.json
+npm run bench          # time per position on this machine (about 0.8 s for 5M on a laptop CPU)
+npm run build          # dist/<model>.zip for AWS Lambda (Node.js 20+, handler index.handler, env MODEL=<model>)
+```
 
-Nothing from Maia is in this repository yet: the licences come first.
+## Models
+
+`models.json` lists each model, its route, its weights file and their sha256 (checked at build). The
+weights are not in this repository: they come from maia3-web's package. Planned: Maia-3 23M (converted
+to int8 with maia3-web's export tool).
+
+## Releases
+
+A tag `v*` builds `dist/<model>.zip` and `SHA256SUMS` in GitHub Actions and attaches them to a GitHub
+release. A deployment pins a release and checks the zips against `SHA256SUMS`; no cloud keys live here.

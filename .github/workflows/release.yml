@@ -1,0 +1,17 @@
+# A tag v* builds one zip per model (weights checked against models.json) and attaches them, with their
+# SHA256SUMS, to a GitHub release. Deployments pin a release and its checksums; no cloud keys here.
+name: release
+on: { push: { tags: ["v*"] } }
+permissions: { contents: write }
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS --title "$GITHUB_REF_NAME" --generate-notes
+        env: { GH_TOKEN: "${{ github.token }}" }

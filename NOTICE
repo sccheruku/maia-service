@@ -1,0 +1,12 @@
+maia-service
+Copyright (C) 2026 the maia-service authors. Licensed under the GNU Affero General Public License v3.0
+(LICENSE).
+
+This service runs Maia-3, a model of human chess moves by the Computational Social Science Lab (CSSLab),
+University of Toronto: https://github.com/CSSLab/maia3 (AGPL-3.0), weights
+https://huggingface.co/UofTCSSLab. Please cite the Maia-3 paper when you use its predictions.
+
+It uses maia3-web by Geoffrey Plitt, Maia-3 in dependency-free TypeScript with int8 weights:
+https://github.com/GeoffreyPlitt/maia3-web (AGPL-3.0), unmodified, as an npm dependency.
+
+chess.js (BSD-2-Clause): https://github.com/jhlywa/chess.js

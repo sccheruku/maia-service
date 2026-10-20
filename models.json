@@ -1,0 +1,9 @@
+{
+  "maia3-5m": {
+    "route": "/maia/v3/5m/predict",
+    "weights": "maia3-5m.int8.bin",
+    "from": "maia3-web 0.1.0 (weights/maia3-5m.int8.bin): Maia3-5M converted to int8 by maia3-web's tools/export_weights.py",
+    "sha256": "ece07c6a01e53b9995745a79819cfd61a3924a2adf6c825bed1b6855fde7c099",
+    "upstream": "https://huggingface.co/UofTCSSLab/Maia3-5M"
+  }
+}

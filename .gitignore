@@ -8,3 +8,6 @@ models/
 *.pt
 *.pb.gz
 *.onnx
+node_modules/
+dist/
+*.bin
